@@ -37,6 +37,42 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping("/{id}")
+    public ResponseEntity<ApiResponse> updateUser(@RequestBody User user, @PathVariable Integer id) {
+        Optional<User> optionalUser = this.userService.findById(id);
+        if (optionalUser.isPresent()) {
+            User usr = optionalUser.get();
+            usr.setUsername(user.getUsername());
+            usr.setEmail(user.getEmail());
+            usr.setPassword(user.getPassword());
+
+            ApiResponse response = new ApiResponse.Builder()
+                    .status(200)
+                    .message("User updated successfully")
+                    .data(userService.updateUser(usr))
+                    .build();
+            return ResponseEntity.ok(response);
+        } else {
+            ApiResponse response = new ApiResponse.Builder()
+                    .status(200)
+                    .message("User not found")
+                    .data(userService.updateUser(null))
+                    .build();
+            return ResponseEntity.ok(response);
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse> deleteUser(@PathVariable Integer id) {
+        userService.deleteById(id);
+        ApiResponse response = new ApiResponse.Builder()
+                .status(200)
+                .message("User deleted successfully")
+                .data(null)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
     @PostMapping("/login")
     public ResponseEntity<ApiResponse> loginUser(@RequestBody LoginDTO loginDTO) {
         Optional<User> optionalUser = this.userService.findByEmail(loginDTO.getEmail());
