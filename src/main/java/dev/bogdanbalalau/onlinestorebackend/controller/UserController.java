@@ -7,6 +7,7 @@ import dev.bogdanbalalau.onlinestorebackend.entity.UserRole;
 import dev.bogdanbalalau.onlinestorebackend.service.UserService;
 import dev.bogdanbalalau.onlinestorebackend.utils.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -89,8 +90,12 @@ public class UserController {
                 return ResponseEntity.ok(response);
             }
         }
-
-        return ResponseEntity.ok(null);
+        ApiResponse response = new ApiResponse.Builder()
+                .status(404)
+                .message("User not found")
+                .data(null)
+                .build();
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
     @PostMapping("/register")
