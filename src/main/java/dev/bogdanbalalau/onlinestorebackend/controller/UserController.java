@@ -2,8 +2,10 @@ package dev.bogdanbalalau.onlinestorebackend.controller;
 
 import dev.bogdanbalalau.onlinestorebackend.dto.LoginDTO;
 import dev.bogdanbalalau.onlinestorebackend.dto.RegisterDTO;
+import dev.bogdanbalalau.onlinestorebackend.entity.Order;
 import dev.bogdanbalalau.onlinestorebackend.entity.User;
 import dev.bogdanbalalau.onlinestorebackend.entity.UserRole;
+import dev.bogdanbalalau.onlinestorebackend.service.OrderService;
 import dev.bogdanbalalau.onlinestorebackend.service.UserService;
 import dev.bogdanbalalau.onlinestorebackend.utils.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +22,9 @@ import java.util.Optional;
 public class UserController {
 
     private UserService userService;
+
+    @Autowired
+    private OrderService orderService;
 
     @Autowired
     public UserController(UserService userService) {
@@ -65,13 +70,24 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse> deleteUser(@PathVariable Integer id) {
-        userService.deleteById(id);
+        Optional<User> user = this.userService.findById(id);
+        if (user.isPresent()) {
+            List<Order> orders = this.orderService.findByUser(user.get());
+            this.orderService.deleteAll(orders);
+            this.userService.deleteUser(user.get());
+            ApiResponse response = new ApiResponse.Builder()
+                    .status(200)
+                    .message("User deleted successfully")
+                    .data(null)
+                    .build();
+            return ResponseEntity.ok(response);
+        }
         ApiResponse response = new ApiResponse.Builder()
-                .status(200)
-                .message("User deleted successfully")
+                .status(404)
+                .message("User not found")
                 .data(null)
                 .build();
-        return ResponseEntity.ok(response);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
     @PostMapping("/login")
