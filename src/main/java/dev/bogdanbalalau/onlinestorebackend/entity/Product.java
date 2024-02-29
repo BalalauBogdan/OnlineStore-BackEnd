@@ -22,5 +22,5 @@ public class Product {
 
     private Double price;
 
-    private Integer size;
+    private Double size;
 }
