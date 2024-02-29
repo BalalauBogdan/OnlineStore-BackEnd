@@ -8,6 +8,7 @@ import dev.bogdanbalalau.onlinestorebackend.entity.UserRole;
 import dev.bogdanbalalau.onlinestorebackend.service.OrderService;
 import dev.bogdanbalalau.onlinestorebackend.service.UserService;
 import dev.bogdanbalalau.onlinestorebackend.utils.ApiResponse;
+import dev.bogdanbalalau.onlinestorebackend.utils.PasswordEncryption;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -50,7 +51,7 @@ public class UserController {
             User usr = optionalUser.get();
             usr.setUsername(user.getUsername());
             usr.setEmail(user.getEmail());
-            usr.setPassword(user.getPassword());
+            usr.setPassword(PasswordEncryption.encryptPassword(user.getPassword()));
 
             ApiResponse response = new ApiResponse.Builder()
                     .status(200)
@@ -96,7 +97,7 @@ public class UserController {
 
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
-            if (user.getPassword().equals(loginDTO.getPassword())) {
+            if (PasswordEncryption.checkPassword(user.getPassword(), loginDTO.getPassword())) {
                 ApiResponse response = new ApiResponse.Builder()
                         .status(200)
                         .message("User authenticated successfully")
@@ -119,7 +120,7 @@ public class UserController {
         User user = new User();
         user.setUsername(registerDTO.getUsername());
         user.setEmail(registerDTO.getEmail());
-        user.setPassword(registerDTO.getPassword());
+        user.setPassword(PasswordEncryption.encryptPassword(registerDTO.getPassword()));
         user.setUserRole(UserRole.USER);
 
         ApiResponse response = new ApiResponse.Builder()
